@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tower Defense - Top to Bottom</title>
+    <title>Tower Defense - Shooting with Spacebar</title>
     <style>
         body {
             margin: 0;
@@ -26,8 +26,10 @@
         const ctx = canvas.getContext('2d');
 
         let enemies = [];
+        let bullets = [];
         let spawnInterval = 1000; // Spawn every 1 second
         let lastSpawnTime = 0;
+        let shooting = false;
 
         // Tower at the bottom
         const playerTower = {
@@ -35,7 +37,47 @@
             y: canvas.height - 50,
             width: 50,
             height: 50,
+            bulletSpeed: 5
         };
+
+        // Handle shooting with spacebar
+        window.addEventListener('keydown', (event) => {
+            if (event.code === 'Space') {
+                shooting = true;
+            }
+        });
+
+        window.addEventListener('keyup', (event) => {
+            if (event.code === 'Space') {
+                shooting = false;
+            }
+        });
+
+        function spawnBullet() {
+            bullets.push({
+                x: playerTower.x + playerTower.width / 2 - 5,
+                y: playerTower.y,
+                width: 10,
+                height: 20,
+                speed: playerTower.bulletSpeed
+            });
+        }
+
+        function updateBullets() {
+            bullets.forEach((bullet, index) => {
+                bullet.y -= bullet.speed; // Move up the screen
+                if (bullet.y < 0) {
+                    bullets.splice(index, 1); // Remove bullet when off-screen
+                }
+            });
+        }
+
+        function drawBullets() {
+            bullets.forEach(bullet => {
+                ctx.fillStyle = 'yellow';
+                ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+            });
+        }
 
         function spawnEnemy() {
             enemies.push({
@@ -81,6 +123,15 @@
                 spawnEnemy();
                 lastSpawnTime = timestamp;
             }
+
+            // Shoot bullets if spacebar is pressed
+            if (shooting) {
+                spawnBullet();
+            }
+
+            // Update and draw bullets
+            updateBullets();
+            drawBullets();
 
             // Update and draw enemies
             updateEnemies();
