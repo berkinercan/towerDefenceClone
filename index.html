@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tower Defense - Shooting with Spacebar</title>
+    <title>Tower Defense - Bolt Shooting</title>
     <style>
         body {
             margin: 0;
@@ -30,6 +30,8 @@
         let spawnInterval = 1000; // Spawn every 1 second
         let lastSpawnTime = 0;
         let shooting = false;
+        let lastShotTime = 0;
+        let fireRate = 200; // Time between each bolt
 
         // Tower at the bottom
         const playerTower = {
@@ -37,7 +39,8 @@
             y: canvas.height - 50,
             width: 50,
             height: 50,
-            bulletSpeed: 5
+            bulletSpeed: 5,
+            bulletLength: 20 // Length of each bolt
         };
 
         // Handle shooting with spacebar
@@ -55,10 +58,10 @@
 
         function spawnBullet() {
             bullets.push({
-                x: playerTower.x + playerTower.width / 2 - 5,
+                x: playerTower.x + playerTower.width / 2 - 2,
                 y: playerTower.y,
-                width: 10,
-                height: 20,
+                width: 4,  // Thin bolt
+                height: playerTower.bulletLength,
                 speed: playerTower.bulletSpeed
             });
         }
@@ -66,7 +69,7 @@
         function updateBullets() {
             bullets.forEach((bullet, index) => {
                 bullet.y -= bullet.speed; // Move up the screen
-                if (bullet.y < 0) {
+                if (bullet.y + bullet.height < 0) {
                     bullets.splice(index, 1); // Remove bullet when off-screen
                 }
             });
@@ -124,9 +127,10 @@
                 lastSpawnTime = timestamp;
             }
 
-            // Shoot bullets if spacebar is pressed
-            if (shooting) {
+            // Shoot bolts if spacebar is pressed with fire rate limit
+            if (shooting && timestamp - lastShotTime > fireRate) {
                 spawnBullet();
+                lastShotTime = timestamp;
             }
 
             // Update and draw bullets
