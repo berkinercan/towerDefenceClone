@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tower Defense - Bolt Shooting</title>
+    <title>Tower Defense - Collision Detection</title>
     <style>
         body {
             margin: 0;
@@ -67,11 +67,25 @@
         }
 
         function updateBullets() {
-            bullets.forEach((bullet, index) => {
+            bullets.forEach((bullet, bulletIndex) => {
                 bullet.y -= bullet.speed; // Move up the screen
                 if (bullet.y + bullet.height < 0) {
-                    bullets.splice(index, 1); // Remove bullet when off-screen
+                    bullets.splice(bulletIndex, 1); // Remove bullet when off-screen
                 }
+
+                // Collision detection with enemies
+                enemies.forEach((enemy, enemyIndex) => {
+                    if (
+                        bullet.x < enemy.x + enemy.width &&
+                        bullet.x + bullet.width > enemy.x &&
+                        bullet.y < enemy.y + enemy.height &&
+                        bullet.y + bullet.height > enemy.y
+                    ) {
+                        // Collision detected
+                        enemies.splice(enemyIndex, 1); // Remove enemy
+                        bullets.splice(bulletIndex, 1); // Remove bullet
+                    }
+                });
             });
         }
 
