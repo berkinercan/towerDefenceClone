@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tower Defense - Collision Detection</title>
+    <title>Tower Defense - Tower Movement</title>
     <style>
         body {
             margin: 0;
@@ -39,22 +39,46 @@
             y: canvas.height - 50,
             width: 50,
             height: 50,
+            speed: 5,
             bulletSpeed: 5,
             bulletLength: 20 // Length of each bolt
         };
 
+        let keys = {};
+
         // Handle shooting with spacebar
         window.addEventListener('keydown', (event) => {
+            keys[event.code] = true;
             if (event.code === 'Space') {
                 shooting = true;
             }
         });
 
         window.addEventListener('keyup', (event) => {
+            keys[event.code] = false;
             if (event.code === 'Space') {
                 shooting = false;
             }
         });
+
+        function movePlayerTower() {
+            if (keys['ArrowLeft']) {
+                playerTower.x -= playerTower.speed;
+                if (playerTower.x < 0) playerTower.x = 0; // Left boundary
+            }
+            if (keys['ArrowRight']) {
+                playerTower.x += playerTower.speed;
+                if (playerTower.x + playerTower.width > canvas.width) playerTower.x = canvas.width - playerTower.width; // Right boundary
+            }
+            if (keys['ArrowUp']) {
+                playerTower.y -= playerTower.speed;
+                if (playerTower.y < 0) playerTower.y = 0; // Top boundary
+            }
+            if (keys['ArrowDown']) {
+                playerTower.y += playerTower.speed;
+                if (playerTower.y + playerTower.height > canvas.height) playerTower.y = canvas.height - playerTower.height; // Bottom boundary
+            }
+        }
 
         function spawnBullet() {
             bullets.push({
@@ -134,6 +158,9 @@
             // Draw background
             ctx.fillStyle = '#333';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Move player tower
+            movePlayerTower();
 
             // Spawn new enemy at interval
             if (timestamp - lastSpawnTime > spawnInterval) {
