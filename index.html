@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tower Defense - Tower Movement</title>
+    <title>Tower Defense - Smooth Movement Physics</title>
     <style>
         body {
             margin: 0;
@@ -33,13 +33,18 @@
         let lastShotTime = 0;
         let fireRate = 200; // Time between each bolt
 
-        // Tower at the bottom
+        // Tower with movement physics
         const playerTower = {
             x: canvas.width / 2 - 25,
             y: canvas.height - 50,
             width: 50,
             height: 50,
-            speed: 5,
+            speed: 0,
+            maxSpeed: 5,
+            acceleration: 0.2,
+            friction: 0.1,
+            velocityX: 0,
+            velocityY: 0,
             bulletSpeed: 5,
             bulletLength: 20 // Length of each bolt
         };
@@ -62,22 +67,36 @@
         });
 
         function movePlayerTower() {
+            // Acceleration and friction for smooth movement
             if (keys['ArrowLeft']) {
-                playerTower.x -= playerTower.speed;
-                if (playerTower.x < 0) playerTower.x = 0; // Left boundary
+                playerTower.velocityX -= playerTower.acceleration;
+            } else if (keys['ArrowRight']) {
+                playerTower.velocityX += playerTower.acceleration;
+            } else {
+                playerTower.velocityX *= (1 - playerTower.friction);
             }
-            if (keys['ArrowRight']) {
-                playerTower.x += playerTower.speed;
-                if (playerTower.x + playerTower.width > canvas.width) playerTower.x = canvas.width - playerTower.width; // Right boundary
-            }
+
             if (keys['ArrowUp']) {
-                playerTower.y -= playerTower.speed;
-                if (playerTower.y < 0) playerTower.y = 0; // Top boundary
+                playerTower.velocityY -= playerTower.acceleration;
+            } else if (keys['ArrowDown']) {
+                playerTower.velocityY += playerTower.acceleration;
+            } else {
+                playerTower.velocityY *= (1 - playerTower.friction);
             }
-            if (keys['ArrowDown']) {
-                playerTower.y += playerTower.speed;
-                if (playerTower.y + playerTower.height > canvas.height) playerTower.y = canvas.height - playerTower.height; // Bottom boundary
-            }
+
+            // Cap velocity to max speed
+            playerTower.velocityX = Math.max(-playerTower.maxSpeed, Math.min(playerTower.maxSpeed, playerTower.velocityX));
+            playerTower.velocityY = Math.max(-playerTower.maxSpeed, Math.min(playerTower.maxSpeed, playerTower.velocityY));
+
+            // Update position
+            playerTower.x += playerTower.velocityX;
+            playerTower.y += playerTower.velocityY;
+
+            // Boundary collision
+            if (playerTower.x < 0) playerTower.x = 0;
+            if (playerTower.x + playerTower.width > canvas.width) playerTower.x = canvas.width - playerTower.width;
+            if (playerTower.y < 0) playerTower.y = 0;
+            if (playerTower.y + playerTower.height > canvas.height) playerTower.y = canvas.height - playerTower.height;
         }
 
         function spawnBullet() {
