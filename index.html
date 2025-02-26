@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tower Defense - Smooth Movement Physics</title>
+    <title>Tower Defense - Multiple Enemy Types</title>
     <style>
         body {
             margin: 0;
@@ -19,7 +19,7 @@
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="600" height="400"></canvas>
+    <canvas id="gameCanvas" width="600" height="750"></canvas>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
@@ -125,8 +125,12 @@
                         bullet.y + bullet.height > enemy.y
                     ) {
                         // Collision detected
-                        enemies.splice(enemyIndex, 1); // Remove enemy
+                        enemy.health -= 1; // Reduce health on hit
                         bullets.splice(bulletIndex, 1); // Remove bullet
+
+                        if (enemy.health <= 0) {
+                            enemies.splice(enemyIndex, 1); // Remove enemy when health is 0
+                        }
                     }
                 });
             });
@@ -140,13 +144,26 @@
         }
 
         function spawnEnemy() {
-            enemies.push({
+            const enemyType = Math.floor(Math.random() * 3); // Randomize enemy type
+            let enemy = {
                 x: Math.floor(Math.random() * (canvas.width - 30)),
-                y: -30, // Start off-screen at the top
+                y: -30,
                 width: 30,
                 height: 30,
-                speed: 2
-            });
+                speed: 2,
+                color: 'red',
+                health: 1 // Default health
+            };
+
+            if (enemyType === 1) { // Medium (Yellow) Enemy
+                enemy.color = 'yellow';
+                enemy.health = 2;
+            } else if (enemyType === 2) { // Strong (Purple) Enemy
+                enemy.color = 'purple';
+                enemy.health = 3;
+            }
+
+            enemies.push(enemy);
         }
 
         function updateEnemies() {
@@ -160,7 +177,7 @@
 
         function drawEnemies() {
             enemies.forEach(enemy => {
-                ctx.fillStyle = 'red';
+                ctx.fillStyle = enemy.color;
                 ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
             });
         }
@@ -171,44 +188,30 @@
         }
 
         function gameLoop(timestamp) {
-            // Clear canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw background
             ctx.fillStyle = '#333';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Move player tower
             movePlayerTower();
 
-            // Spawn new enemy at interval
-            if (timestamp - lastSpawnTime > spawnInterval) {
-                spawnEnemy();
-                lastSpawnTime = timestamp;
-            }
-
-            // Shoot bolts if spacebar is pressed with fire rate limit
             if (shooting && timestamp - lastShotTime > fireRate) {
                 spawnBullet();
                 lastShotTime = timestamp;
             }
 
-            // Update and draw bullets
             updateBullets();
             drawBullets();
 
-            // Update and draw enemies
+            if (timestamp - lastSpawnTime > spawnInterval) {
+                spawnEnemy();
+                lastSpawnTime = timestamp;
+            }
+
             updateEnemies();
             drawEnemies();
-
-            // Draw player tower
             drawPlayerTower();
-
-            // Call the next frame
             requestAnimationFrame(gameLoop);
         }
 
-        // Start the game loop
         gameLoop();
     </script>
 </body>
