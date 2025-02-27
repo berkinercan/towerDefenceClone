@@ -27,7 +27,7 @@
 
         let enemies = [];
         let bullets = [];
-        let spawnInterval = 1000; // Spawn every 1 second
+        let spawnInterval = 667; // 50% faster spawn rate // Spawn every 1 second
         let lastSpawnTime = 0;
         let shooting = false;
         let lastShotTime = 0;
@@ -144,7 +144,15 @@
         }
 
         function spawnEnemy() {
-            const enemyType = Math.floor(Math.random() * 3); // Randomize enemy type
+            const randomNum = Math.random();
+            let enemyType;
+            if (randomNum < 0.6) { // 60% chance for Red (most common)
+                enemyType = 0;
+            } else if (randomNum < 0.85) { // 25% chance for Yellow (second most common)
+                enemyType = 1;
+            } else { // 15% chance for Purple (least common)
+                enemyType = 2;
+            } // Randomize enemy type
             let enemy = {
                 x: Math.floor(Math.random() * (canvas.width - 30)),
                 y: -30,
@@ -202,6 +210,10 @@
             drawBullets();
 
             if (timestamp - lastSpawnTime > spawnInterval) {
+                spawnEnemy(); // Spawn extra enemy for 50% increase
+                if (Math.random() < 0.5) { // 50% chance to spawn an extra enemy
+                    spawnEnemy();
+                }
                 spawnEnemy();
                 lastSpawnTime = timestamp;
             }
