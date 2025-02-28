@@ -166,7 +166,14 @@
             if (enemyType === 1) { // Medium (Yellow) Enemy
                 enemy.color = 'yellow';
                 enemy.health = 2;
+                enemy.zigzag = true; // Zigzag movement for Yellow enemies
+                enemy.direction = 1; // Start direction for zigzag
+                enemy.color = 'yellow';
+                enemy.health = 2;
             } else if (enemyType === 2) { // Strong (Purple) Enemy
+                enemy.color = 'purple';
+                enemy.health = 3;
+                enemy.speed = 3; // Faster speed for Purple enemies
                 enemy.color = 'purple';
                 enemy.health = 3;
             }
@@ -176,7 +183,16 @@
 
         function updateEnemies() {
             enemies.forEach((enemy, index) => {
-                enemy.y += enemy.speed; // Move downward
+                enemy.y += enemy.speed;
+                // Zigzag movement for Purple enemies
+                if (enemy.zigzag) {
+                    enemy.x += enemy.direction * 1.5; // Smaller zigzag step for smoother movement
+                    enemy.y += enemy.speed; // Continue moving downward // Move left and right
+                    // Change direction at boundaries
+                    if (enemy.x <= 0 || enemy.x + enemy.width >= canvas.width) {
+                        enemy.direction *= -1;
+                    }
+                } // Move downward
                 if (enemy.y > canvas.height) {
                     enemies.splice(index, 1); // Remove enemy when off-screen
                 }
